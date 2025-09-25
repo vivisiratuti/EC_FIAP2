@@ -40,7 +40,7 @@ with col2:
 # Carrega e prepara os dados
 try:
     # Define a URL e o nome do arquivo de saída
-    url = "https://drive.google.com/uc?id=1HUS0Yk9DiY0FfZrnAq8FoxCvhtp3nMK9"
+    url = "https://drive.google.com/uc?id=1pnRz8U549V68CdtZ3x50U1p5jFR3Vd2P"
     output_filename = 'df_t.csv'
 
     # Usa o gdown para baixar o arquivo
@@ -255,7 +255,7 @@ col_5dias, col_prev = st.columns(2)
 with col_5dias:
     st.header('Previsão para os Próximos 5 Dias')
 
-    data_inicio_filtro = datetime.date(2025, 9, 14)
+    data_inicio_filtro = datetime.date(2025, 9, 25)
     data_fim_filtro = data_inicio_filtro + datetime.timedelta(days=4)
 
     previsao_5_dias = previsao[
@@ -310,4 +310,5 @@ with col_5dias:
 with col_prev:
     st.header('Previsão de Próxima Compra')
     st.dataframe(previsao_df_display[['ID do Cliente', 'ÚLTIMA COMPRA', 'PRÓXIMA COMPRA PREVISTA']], hide_index=True)
+
  
