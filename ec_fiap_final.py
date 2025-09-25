@@ -265,7 +265,8 @@ with col_5dias:
 
     if previsao_5_dias.empty:
         st.info(
-            f"Nenhuma previsão de compra encontrada para o período de {data_inicio_filtro.strftime('%d/%m/%Y')} a {data_fim_filtro.strftime('%d/%m/%Y')}."
+            f"Nenhuma previsão de compra encontrada para o período de {data_inicio_filtro.strftime('%d/%m/%Y')} "
+            f"a {data_fim_filtro.strftime('%d/%m/%Y')}."
         )
     else:
         previsao_5_dias_com_destino = pd.merge(
@@ -276,23 +277,40 @@ with col_5dias:
         )
 
         previsao_5_dias_com_destino['DESTINO_IDA'] = previsao_5_dias_com_destino.groupby('ID_CLIENTE_SIMPLIFICADO')[
-            'LOCAL_DESTINO_IDA_SIMPLIFICADO'].transform(lambda x: x.mode()[0] if not x.mode().empty else None)
+            'LOCAL_DESTINO_IDA_SIMPLIFICADO'
+        ].transform(lambda x: x.mode()[0] if not x.mode().empty else None)
 
         previsao_5_dias_com_destino.drop_duplicates(subset='ID_CLIENTE_SIMPLIFICADO', inplace=True)
         previsao_5_dias_com_destino.dropna(subset=['DESTINO_IDA'], inplace=True)
 
+        #Agrupamento
         df_chart_final = previsao_5_dias_com_destino.groupby(
             [pd.to_datetime(previsao_5_dias_com_destino['PROXIMA_COMPRA']).dt.strftime('%d/%m'), 'DESTINO_IDA']
         ).size().reset_index(name='Quantidade de Clientes')
 
         df_chart_final.rename(columns={'PROXIMA_COMPRA': 'Data'}, inplace=True)
 
+        #Opção do usuário: quantos destinos mostrar
+        num_destinos = st.selectbox(
+            "Selecione quantos destinos mostrar:",
+            options=[3, 5, 10],
+            index=1,  # começa em 5 por padrão
+            help="Define os destinos mais frequentes exibidos no gráfico"
+        )
+
+        # Seleciona os destinos mais frequentes
+        top_destinos = (
+            df_chart_final.groupby('DESTINO_IDA')['Quantidade de Clientes']
+            .sum()
+            .nlargest(num_destinos)
+            .index
+        )
+        df_chart_final = df_chart_final[df_chart_final['DESTINO_IDA'].isin(top_destinos)]
+
+        # Paleta de cores personalizada
         cores_personalizadas = [
             '#1092C6', '#0D79A4', '#1199CF', '#0C6CBF', '#0A6082',
-            '#084760', '#13303D', '#287BE0', '#5984D6', '#5689F5',
-            '#115FD4', '#0F56BF', '#115DCF', '#09316E', '#0E4DAB',
-            '#0C4396', '#0A3A82', '#072B59', '#061F45', '#1471FC',
-            '#1048C2', '#0E40AD'
+            '#084760', '#13303D', '#287BE0', '#5984D6', '#5689F5'
         ]
 
         destinos_unicos = sorted(df_chart_final['DESTINO_IDA'].unique())
@@ -301,7 +319,8 @@ with col_5dias:
         chart = alt.Chart(df_chart_final).mark_bar().encode(
             x=alt.X('Data:O', axis=alt.Axis(title="Data prevista")),
             y=alt.Y('Quantidade de Clientes:Q', title='Clientes com previsão de compra'),
-            color=alt.Color('DESTINO_IDA:N', scale=escala_cores, title='Destino', legend=alt.Legend(orient="bottom")),
+            color=alt.Color('DESTINO_IDA:N', scale=escala_cores, title='Destino',
+                            legend=alt.Legend(orient="bottom")),
             tooltip=['Data:N', 'DESTINO_IDA:N', 'Quantidade de Clientes:Q']
         ).interactive()
 
@@ -312,4 +331,5 @@ with col_prev:
     st.dataframe(previsao_df_display[['ID do Cliente', 'ÚLTIMA COMPRA', 'PRÓXIMA COMPRA PREVISTA']], hide_index=True)
 
  
+
 
