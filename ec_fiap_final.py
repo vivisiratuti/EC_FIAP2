@@ -40,7 +40,7 @@ with col2:
 # Carrega e prepara os dados
 try:
     # Define a URL e o nome do arquivo de saída
-    url = "https://drive.google.com/uc?id=1pnRz8U549V68CdtZ3x50U1p5jFR3Vd2P"
+    url = "https://drive.google.com/uc?id=1TtGD0bVTcW54zcNjTpm6nOem4PDNj94e"
     output_filename = 'df_t.csv'
 
     # Usa o gdown para baixar o arquivo
@@ -312,3 +312,4 @@ with col_prev:
     st.dataframe(previsao_df_display[['ID do Cliente', 'ÚLTIMA COMPRA', 'PRÓXIMA COMPRA PREVISTA']], hide_index=True)
 
  
+
